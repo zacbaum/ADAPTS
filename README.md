@@ -12,6 +12,8 @@
 
 * Install `mss` to your environment `pip install mss`.
 
+* Install `open-cv` to your environment `pip install opencv-python`.
+
 > Note: Should you need to uninstall / start over; you can remove the environment with `conda env remove --name adapts`.
 
 ## Running ADAPTS
@@ -21,3 +23,7 @@
 * To start, type `python run.py`.
 
 * To exit, mouse over the window which pops-up and hit `q`, or type `Ctrl` + `c` in the Anaconda Prompt.
+
+## Accessing Models
+
+To access the model repository, see [here](https://liveuclac-my.sharepoint.com/:f:/g/personal/rmapzba_ucl_ac_uk/EpD04R0kavRKm-ByMjDYou0B4OnPjdEKSpfYZtcRr_1dVQ?e=icIII8).
