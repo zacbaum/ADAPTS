@@ -5,6 +5,8 @@ import numpy as np
 
 from tensorflow.keras.models import load_model
 
+QA_THRESH = 0.5
+
 with mss.mss() as sct:
     # Part of the screen to capture
     top = 320
@@ -13,7 +15,9 @@ with mss.mss() as sct:
     height = 390
     monitor = {"top": top, "left": left, "width": width, "height": height}
 
-    model = load_model("models/fold1.h5", compile=False)
+    qa_model = load_model("models/quality-cls-50to1.h5", compile=False)
+
+    d_model = load_model("models/fold1.h5", compile=False)
 
     while True:
         #last_time = time.time()
@@ -30,9 +34,13 @@ with mss.mss() as sct:
         # Batch dim, channels dim
         img_processed = np.expand_dims(np.expand_dims(img_scaled, axis=0), axis=-1)
         
-        pred = model(img_processed, training=False)[0]
+        qa_pred = qa_model(img_processed.astype(np.float32), training=False)[0]
 
-        print(pred)
+        if qa_pred.numpy()[0] >= QA_THRESH:
+            d_pred = d_model(img_processed.astype(np.float32), training=False)[0]
+            print("COVID Confidence: {:3f}".format(d_pred.numpy()[0]))
+        else:
+            print("Poor Image Quality!")
 
         # Display the picture
         cv2.imshow("Capture & Output", img)
