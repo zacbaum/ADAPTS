@@ -7,16 +7,16 @@ from tensorflow.keras.models import load_model
 
 with mss.mss() as sct:
     # Part of the screen to capture
-    top = 0
-    left = 100
-    width = 720
-    height = 1080
+    top = 320
+    left = 350
+    width = 260
+    height = 390
     monitor = {"top": top, "left": left, "width": width, "height": height}
 
     model = load_model("models/fold1.h5", compile=False)
 
     while True:
-        last_time = time.time()
+        #last_time = time.time()
 
         # Get raw pixels from the screen, save it to a Numpy array
         img = np.array(sct.grab(monitor))
@@ -25,7 +25,7 @@ with mss.mss() as sct:
         img_gr = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
 
         # Rescale to proper size
-        img_scaled = cv2.resize(img_gr, (width//4, height//4))
+        img_scaled = cv2.resize(img_gr, (180, 270)) # Update this to be the size of network inputs
 
         # Batch dim, channels dim
         img_processed = np.expand_dims(np.expand_dims(img_scaled, axis=0), axis=-1)
@@ -37,7 +37,7 @@ with mss.mss() as sct:
         # Display the picture
         cv2.imshow("Capture & Output", img)
 
-        print("fps: {}".format(1 / (time.time() - last_time)))
+        #print("fps: {}".format(1 / (time.time() - last_time)))
 
 
         # Press "q" to quit
