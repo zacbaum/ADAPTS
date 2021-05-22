@@ -8,11 +8,7 @@
 
 * Once complete, start your environment with `conda activate adapts`.
 
-* Install `TensorFlow` to your environment `conda install tensorflow==2.0.0`. Hit `y` to continue when prompted.
-
-* Install `mss` to your environment `pip install mss`.
-
-* Install `open-cv` to your environment `pip install opencv-python`.
+* Install `TensorFlow`, `mss`, and `OpenCV` to your environment `pip install tensorflow==2.3.1 mss opencv-python`.
 
 > Note: Should you need to uninstall / start over; you can remove the environment with `conda env remove --name adapts`.
 

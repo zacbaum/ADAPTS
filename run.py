@@ -17,10 +17,12 @@ with mss.mss() as sct:
 
     qa_model = load_model("models/quality-cls-50to1.h5", compile=False)
 
-    d_model = load_model("models/fold1.h5", compile=False)
+    d_model = load_model("models/fold1-effnetb0.h5", compile=False)
+
+    unet_model = load_model("models/unet.h5", compile=False)
 
     while True:
-        #last_time = time.time()
+        start_time = time.time()
 
         # Get raw pixels from the screen, save it to a Numpy array
         img = np.array(sct.grab(monitor))
@@ -30,9 +32,12 @@ with mss.mss() as sct:
 
         # Rescale to proper size
         img_scaled = cv2.resize(img_gr, (180, 270)) # Update this to be the size of network inputs
+        img_scaled_seg = cv2.resize(img_gr, (256, 384)) # Update this to be the size of network inputs
 
         # Batch dim, channels dim
         img_processed = np.expand_dims(np.expand_dims(img_scaled, axis=0), axis=-1)
+        img_processed_seg = np.expand_dims(np.expand_dims(img_scaled_seg, axis=0), axis=-1)
+        img_normalized_seg = (img_processed_seg - np.min(img_processed_seg))/np.ptp(img_processed_seg)
         
         qa_pred = qa_model(img_processed.astype(np.float32), training=False)[0]
 
@@ -41,12 +46,17 @@ with mss.mss() as sct:
             print("COVID Confidence: {:3f}".format(d_pred.numpy()[0]))
         else:
             print("Poor Image Quality!")
+        
+        unet_pred = unet_model(img_normalized_seg.astype(np.float32), training=False)[0]
+        unet_pred_rescaled = cv2.resize(np.squeeze(unet_pred), (width, height))
+        unet_pred_denormed = (255 * (unet_pred_rescaled - np.min(unet_pred_rescaled)) / np.ptp(unet_pred_rescaled)).astype(np.uint8)        
+
+        added_img = cv2.addWeighted(np.expand_dims(img_gr, axis=-1), 1.0, np.expand_dims(unet_pred_denormed, axis=-1), 0.75, 0)
 
         # Display the picture
-        cv2.imshow("Capture & Output", img)
+        cv2.imshow("Capture & Output", added_img)
 
-        #print("fps: {}".format(1 / (time.time() - last_time)))
-
+        print("fps: {}".format(1 / (time.time() - start_time)))
 
         # Press "q" to quit
         if cv2.waitKey(25) & 0xFF == ord("q"):
