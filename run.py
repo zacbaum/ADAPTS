@@ -15,7 +15,7 @@ with mss.mss() as sct:
     height = 390
     monitor = {"top": top, "left": left, "width": width, "height": height}
 
-    qa_model = load_model("models/quality-cls-50to1.h5", compile=False)
+    qa_model = load_model("models/quality-cls-50to1-effnetb0.h5", compile=False)
 
     d_model = load_model("models/fold1-effnetb0.h5", compile=False)
 
@@ -43,20 +43,20 @@ with mss.mss() as sct:
 
         if qa_pred.numpy()[0] >= QA_THRESH:
             d_pred = d_model(img_processed.astype(np.float32), training=False)[0]
-            print("COVID Confidence: {:3f}".format(d_pred.numpy()[0]))
-        else:
-            print("Poor Image Quality!")
+            print("COVID Likelihood: {:.2f}".format(d_pred.numpy()[0]))
+
+            unet_pred = unet_model(img_normalized_seg.astype(np.float32), training=False)[0]
+            unet_pred_rescaled = cv2.resize(np.squeeze(unet_pred), (width, height))
+            unet_pred_denormed = (255 * (unet_pred_rescaled - np.min(unet_pred_rescaled)) / np.ptp(unet_pred_rescaled)).astype(np.uint8)        
+
+            added_img = cv2.addWeighted(np.expand_dims(img_gr, axis=-1), 1.0, np.expand_dims(unet_pred_denormed, axis=-1), 0.75, 0)
+            cv2.imshow("Capture & Output", added_img)
         
-        unet_pred = unet_model(img_normalized_seg.astype(np.float32), training=False)[0]
-        unet_pred_rescaled = cv2.resize(np.squeeze(unet_pred), (width, height))
-        unet_pred_denormed = (255 * (unet_pred_rescaled - np.min(unet_pred_rescaled)) / np.ptp(unet_pred_rescaled)).astype(np.uint8)        
-
-        added_img = cv2.addWeighted(np.expand_dims(img_gr, axis=-1), 1.0, np.expand_dims(unet_pred_denormed, axis=-1), 0.75, 0)
-
-        # Display the picture
-        cv2.imshow("Capture & Output", added_img)
-
-        print("fps: {}".format(1 / (time.time() - start_time)))
+        else:
+            print("Poor Image Quality!")    
+            cv2.imshow("Capture & Output", img_gr)
+        
+        #print("fps: {}".format(1 / (time.time() - start_time)))
 
         # Press "q" to quit
         if cv2.waitKey(25) & 0xFF == ord("q"):

@@ -4,11 +4,11 @@
 
 * Install Anaconda Navigator
 
-* From Anaconda Prompt, create a new environment called `adapts` using the command `conda create --name adapts`. Hit `y` to continue when prompted.
+* From Anaconda Prompt, create a new environment called `adapts` using the command `conda create --name adapts python=3.6.7`. Hit `y` to continue when prompted.
 
 * Once complete, start your environment with `conda activate adapts`.
 
-* Install `TensorFlow`, `mss`, and `OpenCV` to your environment `pip install tensorflow==2.3.1 mss opencv-python`.
+* Install `TensorFlow`, `mss`, and `OpenCV` to your environment using `pip install tensorflow==2.3.1 mss opencv-python`.
 
 > Note: Should you need to uninstall / start over; you can remove the environment with `conda env remove --name adapts`.
 
