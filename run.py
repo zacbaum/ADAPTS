@@ -38,14 +38,14 @@ with mss.mss() as sct:
         img_processed = np.expand_dims(np.expand_dims(img_scaled, axis=0), axis=-1)
         img_processed_seg = np.expand_dims(np.expand_dims(img_scaled_seg, axis=0), axis=-1)
         img_normalized_seg = (img_processed_seg - np.min(img_processed_seg))/np.ptp(img_processed_seg)
-        
-        qa_pred = qa_model(img_processed.astype(np.float32), training=False)[0]
+                
+        qa_pred = qa_model.predict_on_batch(img_processed.astype(np.float32))[0]
 
-        if qa_pred.numpy()[0] >= QA_THRESH:
-            d_pred = d_model(img_processed.astype(np.float32), training=False)[0]
-            print("COVID Likelihood: {:.2f}".format(d_pred.numpy()[0]))
+        if qa_pred[0] >= QA_THRESH:
+            d_pred = d_model.predict_on_batch(img_processed.astype(np.float32))[0]
+            print("COVID Likelihood: {:.2f}".format(d_pred[0]))
 
-            unet_pred = unet_model(img_normalized_seg.astype(np.float32), training=False)[0]
+            unet_pred = unet_model.predict_on_batch(img_normalized_seg.astype(np.float32))[0]
             unet_pred_rescaled = cv2.resize(np.squeeze(unet_pred), (width, height))
             unet_pred_denormed = (255 * (unet_pred_rescaled - np.min(unet_pred_rescaled)) / np.ptp(unet_pred_rescaled)).astype(np.uint8)        
 
