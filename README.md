@@ -10,6 +10,8 @@
 
 * Install `TensorFlow`, `mss`, and `OpenCV` to your environment using `pip install tensorflow==2.3.1 mss opencv-python`.
 
+> Note: If you are using a machine with a GPU, you can utilize this. You will need to additionally install CuDNN and CUDA Toolkit using `conda install cudatoolkit=10.1 cudnn=7.6.5`. When installing tensorflow, change the above `tensorflow==2.3.1` to `tensorflow-gpu==2.3.1` as well.
+
 > Note: Should you need to uninstall / start over; you can remove the environment with `conda env remove --name adapts`.
 
 ## Running ADAPTS
