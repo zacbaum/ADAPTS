@@ -3,6 +3,7 @@ import cv2
 import mss
 import numpy as np
 import tensorflow as tf
+import sys
 
 from tensorflow.keras.models import load_model
 
@@ -56,8 +57,18 @@ def get_added_gradcam(img, heatmap, alpha=0.2):
 
     return superimposed_img
 
-use_unet = False
-show_fps = True
+use_unet = True if sys.argv[1] == '1' else False
+show_fps = True if sys.argv[2] == '1' else False
+
+print("\n")
+print("\n")
+print("#######################################")
+print("\n")
+print("ADAPTS is starting up... Please wait...")
+print("\n")
+print("#######################################")
+print("\n")
+print("\n")
 
 with mss.mss() as sct:
     # Part of the screen to capture
@@ -99,6 +110,8 @@ with mss.mss() as sct:
                 
         qa_pred = qa_model(img_processed.astype(np.float32), training=False)[0]
 
+        print_str = ""
+
         if qa_pred[0] >= QA_THRESH:
             
             if use_unet:
@@ -114,14 +127,16 @@ with mss.mss() as sct:
                 heatmap, d_pred = make_gradcam_heatmap(img_processed, d_model, 'top_conv')
                 added_img = get_added_gradcam(img, heatmap)
 
-            print("COVID Likelihood: {:.2f}".format(np.squeeze(d_pred)))
+            print_str += "COVID Likelihood: {:.2f}".format(np.squeeze(d_pred))
             cv2.imshow("Capture & Output", added_img)
         
         else:
-            print("Poor Image Quality!")    
+            print_str += "Poor Image Quality!"  
             cv2.imshow("Capture & Output", img)
         
-        if show_fps: print("fps: {}".format(1 / (time.time() - start_time)))
+        if show_fps: print_str += " --- FPS: {:.2f}".format(1 / (time.time() - start_time))
+
+        print(print_str)
 
         # Press "q" to quit
         if cv2.waitKey(25) & 0xFF == ord("q"):
