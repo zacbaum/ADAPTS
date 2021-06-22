@@ -60,23 +60,20 @@ def get_added_gradcam(img, heatmap, alpha=0.2):
 use_unet = True if sys.argv[1] == '1' else False
 show_fps = True if sys.argv[2] == '1' else False
 
-print("\n")
-print("\n")
-print("#######################################")
-print("\n")
-print("ADAPTS is starting up... Please wait...")
-print("\n")
-print("#######################################")
-print("\n")
-print("\n")
+# Part of the screen to capture
+top = 320
+left = 350
+width = 260
+height = 390
+monitor = {"top": top, "left": left, "width": width, "height": height}
+
+rescale_factor = 2
+
+window = "ADAPTS"
+cv2.namedWindow(window)
+cv2.moveWindow(window, left + width + 10, top - 30)
 
 with mss.mss() as sct:
-    # Part of the screen to capture
-    top = 320
-    left = 350
-    width = 260
-    height = 390
-    monitor = {"top": top, "left": left, "width": width, "height": height}
 
     qa_model = load_model("models/quality-cls-50to1-effnetb0.h5", compile=False)
     qa_model.call = tf.function(qa_model.call, experimental_relax_shapes=True)
@@ -109,8 +106,7 @@ with mss.mss() as sct:
             img_normalized_seg = (img_processed_seg - np.min(img_processed_seg))/np.ptp(img_processed_seg)
                 
         qa_pred = qa_model(img_processed.astype(np.float32), training=False)[0]
-
-        print_str = ""
+        qa_str = "QA: {:.1f}".format(np.squeeze(qa_pred))
 
         if qa_pred[0] >= QA_THRESH:
             
@@ -118,26 +114,63 @@ with mss.mss() as sct:
                 unet_pred = unet_model(img_normalized_seg.astype(np.float32), training=False)[0]
                 unet_pred_rescaled = cv2.resize(np.squeeze(unet_pred), (width, height))
                 unet_pred_denormed = (255 * (unet_pred_rescaled - np.min(unet_pred_rescaled)) / np.ptp(unet_pred_rescaled)).astype(np.uint8)        
-                added_img = cv2.addWeighted(np.expand_dims(img_gr, axis=-1), 1.0, np.expand_dims(unet_pred_denormed, axis=-1), 0.75, 0)
+                img = cv2.addWeighted(np.expand_dims(img_gr, axis=-1), 1.0, np.expand_dims(unet_pred_denormed, axis=-1), 0.75, 0)
+        
                 # If we use the unet, we also need to get the diagnosistic likelihood
                 d_pred = d_model(img_processed.astype(np.float32), training=False)[0]
-            
+
             if not use_unet:
                 # If we don't use the unet, we get the diagnositic likelihood from the gradcam outputs
                 heatmap, d_pred = make_gradcam_heatmap(img_processed, d_model, 'top_conv')
-                added_img = get_added_gradcam(img, heatmap)
+                img = get_added_gradcam(img, heatmap)
 
-            print_str += "COVID Likelihood: {:.2f}".format(np.squeeze(d_pred))
-            cv2.imshow("Capture & Output", added_img)
+            covid_str = "COVID: {:.1f}".format(np.squeeze(d_pred))
         
         else:
-            print_str += "Poor Image Quality!"  
-            cv2.imshow("Capture & Output", img)
+            covid_str = "COVID: N/A"  
+
+        if rescale_factor != 1:
+            img = cv2.resize(img, (img.shape[1] * rescale_factor, img.shape[0] * rescale_factor))
         
-        if show_fps: print_str += " --- FPS: {:.2f}".format(1 / (time.time() - start_time))
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        scale = 0.5
+        text_color = (255, 255, 255)
+        px_width = 1
 
-        print(print_str)
+        cv2.putText(
+            img, 
+            qa_str,
+            (5, height * rescale_factor - 25),
+            font,
+            scale,
+            text_color,
+            px_width,
+        )
 
+        cv2.putText(
+            img, 
+            covid_str,
+            (5, height * rescale_factor - 5),
+            font,
+            scale,
+            text_color,
+            px_width,
+        )
+
+        if show_fps: 
+            fps_str = "FPS: {:.1f}".format(1 / (time.time() - start_time))
+            cv2.putText(
+                img, 
+                fps_str,
+                (width * rescale_factor - 75, height * rescale_factor - 5),
+                font,
+                scale,
+                text_color,
+                px_width,
+            )
+
+        cv2.imshow(window, img)
+        
         # Press "q" to quit
         if cv2.waitKey(25) & 0xFF == ord("q"):
             cv2.destroyAllWindows()
