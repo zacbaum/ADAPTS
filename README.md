@@ -2,6 +2,8 @@
  
 ## Setup
 
+>Setup is not required on the ADAPTS PC.
+
 *This portion of the guide assumes that Anaconda Navigator has been installed on the PC.*
 
 From within the ADAPTS Project Folder (`...\Documents\ADAPTS`), double click on `setup_env.bat` or `setup_env-gpu.bat` for computers with GPU.
@@ -30,9 +32,9 @@ Select the ADAPTS Laptop to project your screen to. You should now see the phone
 
 ### Start ADAPTS
 
-* Use the File Explorer to navigate to `...\Documents\ADAPTS` and double click on `run.bat`. This will start ADAPTS with Class Activation Mapping overlaid on the current image.
+* Use the File Explorer to navigate to `...\Documents\ADAPTS` and double click on `run-adapts.bat`. This will start ADAPTS with Class Activation Mapping overlaid on the current image.
 
-  * Alternatively; use the File Explorer to navigate to `...\Documents\ADAPTS` and double click on `run-unet.bat`. This will start ADAPTS with UNet Segmentations overlaid on the current image.
+  * Alternatively; use the File Explorer to navigate to `...\Documents\ADAPTS` and double click on `run-adapts-unet.bat`. This will start ADAPTS with UNet Segmentations overlaid on the current image.
 
 * Move the prompt which appears over to the right side of the screen so it does not block the screen-capturing performed by ADAPTS on the mirrored phone image.
 
@@ -40,4 +42,4 @@ Select the ADAPTS Laptop to project your screen to. You should now see the phone
 
 ## Accessing Models
 
-To access the model repository if you need to update any models, see [here](https://liveuclac-my.sharepoint.com/:f:/g/personal/rmapzba_ucl_ac_uk/EpD04R0kavRKm-ByMjDYou0B4OnPjdEKSpfYZtcRr_1dVQ?e=icIII8).
+To access the model repository if you need to update any models, see [here](https://liveuclac-my.sharepoint.com/:f:/g/personal/rmapzba_ucl_ac_uk/EpD04R0kavRKm-ByMjDYou0B4OnPjdEKSpfYZtcRr_1dVQ?e=icIII8). Then copy the downloaded model(s) into the models folder in ADAPTS.
